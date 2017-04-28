@@ -145,8 +145,17 @@ module.exports.Component = registerComponent('look-controls', {
     var sceneEl = this.el.sceneEl;
     var rotation;
     hmdEuler.setFromQuaternion(hmdQuaternion, 'YXZ');
-    if (isMobile) {
-      // In mobile we allow camera rotation with touch events and sensors
+    if (isMobile && !sceneEl.is('vr-mode')) {
+      currentRotation = this.el.getAttribute('rotation');
+      deltaRotation = this.calculateDeltaRotation();
+
+        // In mobile we allow camera rotation with touch events and sensors
+      rotation = {
+        x: currentRotation.x - deltaRotation.x,
+        y: currentRotation.y - deltaRotation.y,
+        z: currentRotation.z
+      };
+    } else if (isMobile) {
       rotation = {
         x: radToDeg(hmdEuler.x) + radToDeg(pitchObject.rotation.x),
         y: radToDeg(hmdEuler.y) + radToDeg(yawObject.rotation.y),
@@ -275,12 +284,17 @@ module.exports.Component = registerComponent('look-controls', {
 
   onTouchMove: function (e) {
     var deltaY;
+    var deltaX;
     var yawObject = this.yawObject;
+    var pitchObject = this.pitchObject;
     if (!this.touchStarted) { return; }
     deltaY = 2 * Math.PI * (e.touches[0].pageX - this.touchStart.x) /
-            this.el.sceneEl.canvas.clientWidth;
+      this.el.sceneEl.canvas.clientWidth;
+    deltaX = 2 * Math.PI * (e.touches[0].pageY - this.touchStart.y) /
+      this.el.sceneEl.canvas.clientHeight;
     // Limits touch orientaion to to yaw (y axis)
     yawObject.rotation.y -= deltaY * 0.5;
+    pitchObject.rotation.x -= deltaX * 0.5;
     this.touchStart = {
       x: e.touches[0].pageX,
       y: e.touches[0].pageY
