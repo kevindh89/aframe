@@ -307,6 +307,7 @@ module.exports.Component = registerComponent('look-controls', {
 
   onExitVR: function () {
     this.previousHMDPosition.set(0, 0, 0);
+    this.el.setAttribute('rotation', '0 0 0');
   }
 });
 
